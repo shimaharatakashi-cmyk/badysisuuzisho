@@ -1058,23 +1058,49 @@ function analyzeData() {
 
     combinedList.forEach(horse => {
         let targetKey = Math.round(horse.indexVal * 10);
-        let rankStr = horse.rank > 10 ? 10 : horse.rank;
+      let rankStr = horse.rank <= 10 ? horse.rank : null;
 
         let keysToSearch = [targetKey - 10, targetKey, targetKey + 10];
         let sum1=0, sum2=0, sum3=0, sumOut=0, sumTotal=0;
         let sumWinRetAmount=0, sumFukuRetAmount=0;
 
-        keysToSearch.forEach(k => {
-            let kStr = k.toString();
-            if (db[rankStr] && db[rankStr][kStr]) {
-                let d = db[rankStr][kStr];
-                let t = d[0] + d[1] + d[2] + d[3];
-                sum1 += d[0]; sum2 += d[1]; sum3 += d[2]; sumOut += d[3]; sumTotal += t;
-                sumWinRetAmount += (d[4] * t);
-                sumFukuRetAmount += (d[5] * t);
-            }
-        });
+      keysToSearch.forEach(k => {
+    if (horse.rank > 10) return;
 
+    let kStr = k.toString();
+
+    if (db[rankStr]) {
+        if (db[rankStr][kStr]) {
+            let d = db[rankStr][kStr];
+            let t = d[0] + d[1] + d[2] + d[3];
+
+            sum1 += d[0];
+            sum2 += d[1];
+            sum3 += d[2];
+            sumOut += d[3];
+            sumTotal += t;
+
+            sumWinRetAmount += d[4] * t;
+            sumFukuRetAmount += d[5] * t;
+        }
+
+        let fractionKey = (k - 9).toString();
+
+        if (db[rankStr][fractionKey]) {
+            let d = db[rankStr][fractionKey];
+            let t = d[0] + d[1] + d[2] + d[3];
+
+            sum1 += d[0];
+            sum2 += d[1];
+            sum3 += d[2];
+            sumOut += d[3];
+            sumTotal += t;
+
+            sumWinRetAmount += d[4] * t;
+            sumFukuRetAmount += d[5] * t;
+        }
+    }
+});
         let displayStr = "";
         let isHighlight = false;
 
@@ -1297,21 +1323,38 @@ window.analyzeData = function() {
             let kStr = k.toString();
             // DB内に 981 などの端数データが残っている場合も、切り上げとして一緒に拾い上げる処理
             if (raceDb[rankStr]) {
-                if (raceDb[rankStr][kStr]) {
-                    let d = raceDb[rankStr][kStr];
-                    let t = d[0] + d[1] + d[2] + d[3];
-                    sum1+=d[0]; sum2+=d[1]; sum3+=d[2]; sumOut+=d[3]; sumTotal+=t;
-                    sumWinRetAmount += (d[4] * t); sumFukuRetAmount += (d[5] * t);
-                }
-                // k=990 のとき、981 などの .1 データも 99 扱いとして合算する
-                let fractionKey = (k - 9).toString();
-                if (raceDb[rankStr][fractionKey]) {
-                    let d = raceDb[rankStr][fractionKey];
-                    let t = d[0] + d[1] + d[2] + d[3];
-                    sum1+=d[0]; sum2+=d[1]; sum3+=d[2]; sumOut+=d[3]; sumTotal+=t;
-                    sumWinRetAmount += (d[4] * t); sumFukuRetAmount += (d[5] * t);
-                }
-            }
+         if (db[rankStr]) {
+    if (db[rankStr][kStr]) {
+        let d = db[rankStr][kStr];
+        let t = d[0] + d[1] + d[2] + d[3];
+
+        sum1 += d[0];
+        sum2 += d[1];
+        sum3 += d[2];
+        sumOut += d[3];
+        sumTotal += t;
+
+        sumWinRetAmount += d[4] * t;
+        sumFukuRetAmount += d[5] * t;
+    }
+
+    // 例：98.1 → 99 として、981も990側へ合算
+    let fractionKey = (k - 9).toString();
+
+    if (db[rankStr][fractionKey]) {
+        let d = db[rankStr][fractionKey];
+        let t = d[0] + d[1] + d[2] + d[3];
+
+        sum1 += d[0];
+        sum2 += d[1];
+        sum3 += d[2];
+        sumOut += d[3];
+        sumTotal += t;
+
+        sumWinRetAmount += d[4] * t;
+        sumFukuRetAmount += d[5] * t;
+    }
+}
         });
         
         let displayStr = ""; 
